@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Overlay Minecraft Disques</title>
+
+<style>
+
+@font-face {
+    font-family: 'Minecraft';
+    src: url('./fonts/Minecraft.ttf') format('truetype');
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:transparent;
+    width:100vw;
+    height:100vh;
+}
+
+img{
+    image-rendering:pixelated;
+}
+
+/* =========================
+   ANIMATION (À GAUCHE)
+========================= */
+
+#animation-container{
+    position:absolute;
+    top:-320px;
+    left:20px;
+
+    width:250px;
+
+    text-align:center;
+
+    transition:top 1s cubic-bezier(0.22, 1, 0.36, 1);
+
+    z-index:999;
+}
+
+#animation-container.descendre{
+    top:20px;
+}
+
+#anim-cadre{
+    width:230px;
+    height:230px;
+    position:relative;
+}
+
+#anim-disque{
+    position:absolute;
+    top:50px;
+    left:60px;
+
+    width:130px;
+    height:130px;
+
+    object-fit:contain;
+
+    animation:bercement 3s ease-in-out infinite;
+}
+
+@keyframes bercement{
+    0%{transform:rotate(-10deg);}
+    50%{transform:rotate(10deg);}
+    100%{transform:rotate(-10deg);}
+}
+
+#nom-disque{
+    margin-top:10px;
+    font-family:'Minecraft';
+    font-size:26px;
+    color:white;
+    text-shadow:3px 3px 0 #000;
+}
+
+/* =========================
+   COMPTEUR
+========================= */
+
+#counter-disques{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+
+    padding:10px 14px;
+
+    background:rgba(0,0,0,0.85);
+    border:3px solid #555;
+
+    color:white;
+
+    font-family:'Minecraft';
+    font-size:18px;
+
+    text-shadow:2px 2px 0 #000;
+
+    z-index:1000;
+}
+
+/* =========================
+   COLLECTION BAR (CENTRE)
+========================= */
+
+#collection-bar{
+    position:absolute;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+
+    display:flex;
+    flex-wrap:wrap;           
+    justify-content:center;   
+    gap:14px;
+    
+    max-width: calc(100vw - 640px); 
+
+    padding:14px 22px;
+
+    background:linear-gradient(180deg, rgba(30,30,30,0.95), rgba(10,10,10,0.95));
+    border:3px solid #666;
+
+    box-shadow:0 0 20px rgba(0,0,0,0.6);
+
+    opacity:0;
+    transition:0.4s;
+
+    z-index:998;
+}
+
+#collection-bar.show{
+    opacity:1;
+}
+
+.collection-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+
+    transition:0.2s;
+}
+
+.collection-item:hover{
+    transform:scale(1.1);
+}
+
+.collection-item img{
+    width:46px;
+    height:46px;
+    filter:drop-shadow(0 0 5px black);
+}
+
+.collection-item span{
+    font-family:'Minecraft';
+    font-size:11px;
+    color:white;
+}
+
+/* =========================
+   SEARCH (À DROITE)
+========================= */
+
+#search-container{
+    position:absolute;
+    top:20px;
+    right:20px;
+
+    width:300px;
+
+    z-index:1000;
+}
+
+#search-input{
+    width:100%;
+    padding:14px;
+
+    background:#1e1e1e;
+    border:3px solid #555;
+
+    color:white;
+
+    font-family:'Minecraft';
+    font-size:18px;
+
+    outline:none;
+}
+
+#search-results{
+    margin-top:5px;
+
+    background:#1e1e1e;
+    border:3px solid #555;
+
+    max-height:220px;
+    overflow-y:auto;
+}
+
+.result-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:10px;
+    cursor:pointer;
+}
+
+.result-item:hover{
+    background:#333;
+}
+
+.result-item img{
+    width:42px;
+    height:42px;
+}
+
+.result-item span{
+    font-family:'Minecraft';
+    font-size:16px;
+    color:white;
+}
+
+/* =========================
+   LISTE COMPLETE
+========================= */
+
+#all-disks{
+    margin-top:10px;
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+
+    max-height:200px;
+    overflow:auto;
+
+    padding:8px;
+
+    background:#111;
+    border:2px solid #444;
+}
+
+.disk-mini{
+    display:flex;
+    align-items:center;
+    gap:6px;
+
+    padding:6px;
+
+    cursor:pointer;
+
+    background:#1e1e1e;
+    border:1px solid #333;
+}
+
+.disk-mini:hover{
+    background:#333;
+}
+
+.disk-mini img{
+    width:28px;
+    height:28px;
+}
+
+.disk-mini span{
+    font-family:'Minecraft';
+    font-size:12px;
+    color:white;
+}
+
+/* =========================
+   BUTTON TEST
+========================= */
+
+#test-btn{
+    margin-top:10px;
+
+    width:100%;
+    padding:10px;
+
+    background:#222;
+    border:2px solid #666;
+
+    color:white;
+
+    font-family:'Minecraft';
+    font-size:14px;
+
+    cursor:pointer;
+}
+
+#test-btn:hover{
+    background:#444;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="counter-disques"></div>
+
+<div id="animation-container">
+
+    <img id="anim-cadre" src="disques/_cadre.png">
+    <img id="anim-disque" src="">
+    <div id="nom-disque"></div>
+
+</div>
+
+<div id="collection-bar"></div>
+
+<div id="search-container">
+
+    <input type="text" id="search-input" placeholder="Rechercher un disque...">
+
+    <div id="search-results"></div>
+
+    <button id="test-btn">TEST : tout débloquer</button>
+
+    <div id="all-disks"></div>
+
+</div>
+
+<script>
+
+const listeDisques = [
+    '5', '11', '13', 'BLOCKS', 'CAT', 'CHIRP', 'CREATOR MUSIC BOX', 
+    'CREATOR', 'FAR', 'LAVA CHICKEN', 'MALL', 'MELLOHI', 'OTHERSIDE', 
+    'PIGSTEP', 'PRECIPICE', 'RELIC', 'STAL', 'STRAD', 'TEARS', 'WAIT', 'WARD'
+];
+
+let disquesRecuperes = [];
+let audioActuel = null; 
+
+// Liste de tes fichiers sons de victoire dans ton dossier "sons/"
+const sonsVictoire = ['victoire1.mp3'];
+
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+const collectionBar = document.getElementById('collection-bar');
+const counter = document.getElementById('counter-disques');
+const allDisks = document.getElementById('all-disks');
+const testBtn = document.getElementById('test-btn');
+
+const TEMPS_ANIMATION = 8000;
+
+/* =========================
+   COMPTEUR
+========================= */
+
+function updateCounter(){
+    counter.innerText =
+        `Disques restants : ${listeDisques.length - disquesRecuperes.length}`;
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+searchInput.addEventListener('input', () => {
+
+    const val = searchInput.value.toLowerCase();
+
+    searchResults.innerHTML = '';
+
+    if(!val) return;
+
+    listeDisques
+        .filter(d => d.toLowerCase().includes(val))
+        .forEach(disque => {
+
+        const item = document.createElement('div');
+        item.className = 'result-item';
+
+        item.innerHTML = `
+            <img src="disques/${disque}.png">
+            <span>${disque.toUpperCase()}</span>
+        `;
+
+        item.onclick = () => {
+
+            if(!disquesRecuperes.includes(disque)){
+                disquesRecuperes.push(disque);
+                updateCounter();
+            }
+
+            lancerAnimation(disque);
+
+            searchInput.value = '';
+            searchResults.innerHTML = '';
+
+        };
+
+        searchResults.appendChild(item);
+
+    });
+
+});
+
+/* =========================
+   ANIMATION & AUDIO
+========================= */
+
+function lancerAnimation(nom){
+
+    const conteneur = document.getElementById('animation-container');
+    const disque = document.getElementById('anim-disque');
+    const nomDisque = document.getElementById('nom-disque');
+
+    disque.src = `disques/${nom}.png`;
+    nomDisque.innerText = nom.toUpperCase();
+
+    // Arrête le son précédent s'il joue encore
+    if(audioActuel) {
+        audioActuel.pause(); 
+        audioActuel.currentTime = 0;
+    }
+
+    // Choisit un son de victoire aléatoire dans le tableau "sonsVictoire"
+    const sonAleatoire = sonsVictoire[Math.floor(Math.random() * sonsVictoire.length)];
+    
+    // Lance le son choisi (ex: sons/victoire2.mp3)
+    audioActuel = new Audio(`sons/${sonAleatoire}`);
+    audioActuel.play().catch(e => console.log("Erreur audio :", e));
+
+    collectionBar.classList.remove('show');
+
+    conteneur.classList.add('descendre');
+
+    setTimeout(() => {
+
+        conteneur.classList.remove('descendre');
+
+        updateCollection();
+
+    }, TEMPS_ANIMATION);
+
+}
+
+/* =========================
+   COLLECTION
+========================= */
+
+function updateCollection(){
+
+    collectionBar.innerHTML = '';
+
+    disquesRecuperes.forEach(d => {
+
+        const item = document.createElement('div');
+        item.className = 'collection-item';
+
+        item.innerHTML = `
+            <img src="disques/${d}.png">
+            <span>${d.toUpperCase()}</span>
+        `;
+
+        collectionBar.appendChild(item);
+
+    });
+
+    setTimeout(() => {
+        collectionBar.classList.add('show');
+    }, 300);
+
+}
+
+/* =========================
+   LISTE COMPLETE
+========================= */
+
+function afficherTousLesDisques(){
+
+    allDisks.innerHTML = '';
+
+    listeDisques.forEach(disque => {
+
+        const item = document.createElement('div');
+        item.className = 'disk-mini';
+
+        item.innerHTML = `
+            <img src="disques/${disque}.png">
+            <span>${disque.toUpperCase()}</span>
+        `;
+
+        item.onclick = () => {
+
+            if(!disquesRecuperes.includes(disque)){
+                disquesRecuperes.push(disque);
+                updateCounter();
+            }
+
+            lancerAnimation(disque);
+
+        };
+
+        allDisks.appendChild(item);
+
+    });
+
+}
+
+/* =========================
+   BUTTON TEST
+========================= */
+
+testBtn.onclick = () => {
+
+    listeDisques.forEach(d => {
+        if(!disquesRecuperes.includes(d)){
+            disquesRecuperes.push(d);
+        }
+    });
+
+    updateCounter();
+    updateCollection();
+};
+
+/* INIT */
+
+afficherTousLesDisques();
+updateCounter();
+
+</script>
+
+</body>
+</html>
